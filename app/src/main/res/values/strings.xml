@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Happy Places App</string>
+    <string name="et_hint_title">Title</string>
+    <string name="et_hint_description">Description</string>
+    <string name="et_hint_date">Date</string>
+    <string name="et_hint_location">Location</string>
+    <string name="btn_save">SAVE</string>
+    <string name="tv_add_image">ADD IMAGE</string>
 </resources>
