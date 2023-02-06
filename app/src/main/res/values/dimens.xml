@@ -4,8 +4,9 @@
     <dimen name="cl_padding">18dp</dimen>
     <dimen name="btn_text_size">18sp</dimen>
     <dimen name="btn_padding">12dp</dimen>
-    <dimen name="border_width">2dp</dimen>
+    <dimen name="border_box_stroke_width">2dp</dimen>
     <dimen name="iv_location_size">200dp</dimen>
     <dimen name="border_box_padding">2dp</dimen>
+    <dimen name="border_box_radius">3dp</dimen>
 
 </resources>

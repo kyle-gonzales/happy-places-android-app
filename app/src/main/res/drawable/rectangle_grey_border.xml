@@ -4,6 +4,12 @@
 
     <stroke
         android:color="@color/border_grey"
-        android:width="@dimen/border_width"/>
+        android:width="@dimen/border_box_stroke_width"/>
+
+    <solid
+        android:color="@color/white"/>
+
+    <corners
+        android:radius="@dimen/border_box_radius"/>
 
 </shape>
