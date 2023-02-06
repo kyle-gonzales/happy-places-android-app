@@ -17,6 +17,5 @@ class MainActivity : AppCompatActivity() {
             val addIntent = Intent(this@MainActivity, AddHappyPlaceActivity::class.java)
             startActivity(addIntent)
         }
-
     }
 }

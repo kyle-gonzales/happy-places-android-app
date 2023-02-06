@@ -1,5 +1,7 @@
 package com.example.happyplacesapp
 
+import android.app.DatePickerDialog
+import android.icu.util.Calendar
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
@@ -21,6 +23,10 @@ class AddHappyPlaceActivity : AppCompatActivity() {
 
         binding?.toolbar?.setNavigationOnClickListener {
             onBackPressed()
+        }
+
+        binding?.etDate?.setOnClickListener {
+            showCalendarDialog()
         }
     }
 
@@ -46,4 +52,27 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         alertDialog.setCancelable(true)
         alertDialog.show()
     }
+
+    private fun showCalendarDialog() {
+
+        //getting current date
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+
+        //choosing custom date
+        val dpd = DatePickerDialog(this,
+            {_, year, month, day ->
+                val dateText = "${month + 1}/$day/$year"
+                binding?.etDate?.setText(dateText)
+            }
+        , year, month, day)
+
+        dpd.datePicker.maxDate = System.currentTimeMillis() - 86400000
+        dpd.show()
+    }
+
+
 }
