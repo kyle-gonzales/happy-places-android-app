@@ -10,13 +10,14 @@ import com.example.happyplacesapp.databinding.ActivityAddHappyPlaceBinding
 import com.karumi.dexter.Dexter
 import android.Manifest
 import android.app.Activity
-import android.content.ActivityNotFoundException
-import android.content.Intent
+import android.content.*
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,6 +29,11 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOError
+import java.io.IOException
+import java.io.OutputStream
 
 class AddHappyPlaceActivity : AppCompatActivity() {
     private var binding : ActivityAddHappyPlaceBinding? = null
@@ -37,10 +43,28 @@ class AddHappyPlaceActivity : AppCompatActivity() {
     { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
             val thumbnail : Bitmap = result.data?.extras!!.get("data") as Bitmap
+            val uri = saveImage(thumbnail)
+            Log.e("saved file", uri.toString())
             binding?.ivLocation?.setImageBitmap(thumbnail)
+        }
+    }
+
+    private var galleryLauncher : ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult())
+    {result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val uri = result.data?.data
+            try{
+                val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+                binding?.ivLocation?.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                Toast.makeText(this@AddHappyPlaceActivity, "Image Size Too Large", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
+            }
         }
 
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddHappyPlaceBinding.inflate(layoutInflater)
@@ -121,7 +145,10 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             .withListener(object: MultiplePermissionsListener{
                 override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                     if(report!!.areAllPermissionsGranted()){
-                        Toast.makeText(this@AddHappyPlaceActivity, "Storage READ/WRITE Permissions Granted", Toast.LENGTH_SHORT).show()
+//                        Toast.makeText(this@AddHappyPlaceActivity, "Storage READ/WRITE Permissions Granted", Toast.LENGTH_SHORT).show()
+
+                        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        galleryLauncher.launch(galleryIntent)
                     }
                     else if(report.isAnyPermissionPermanentlyDenied){
                         // after denying permissions twice, the app is permanently denied. That is when you want
@@ -162,6 +189,54 @@ class AddHappyPlaceActivity : AppCompatActivity() {
                  dialog.dismiss()
              }
         builder.create().show()
+    }
+
+    private fun saveImageOld(bitmap: Bitmap): Uri {
+        val wrapper = ContextWrapper(applicationContext)
+        val dir = wrapper.getDir("HappyPlacesImages", Context.MODE_PRIVATE)
+
+        val file = File(dir, "Place${System.currentTimeMillis() / 1000}.jpg")
+
+        try{
+            val stream : OutputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            stream.flush()
+            stream.close()
+        } catch (e: IOException) {
+            Toast.makeText(this@AddHappyPlaceActivity,"failed to save image", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+        return Uri.parse(dir.absolutePath)
+
+    }
+
+    private fun saveImage(bitmap: Bitmap): Uri? {
+        if (Build.VERSION.SDK_INT >= 29) {
+            val name = "Place${System.currentTimeMillis() / 1000}.jpg"
+            val relativeLocation = Environment.DIRECTORY_DCIM + "/Happy Places"
+
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Images.Media.DISPLAY_NAME, name)
+                put(MediaStore.Images.Media.RELATIVE_PATH, relativeLocation)
+            }
+                val uri: Uri? = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                val stream : OutputStream? = contentResolver.openOutputStream(uri!!)
+            try {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                contentValues.put(MediaStore.Images.Media.IS_PENDING,false)
+                contentResolver.update(uri, contentValues, null, null)
+                return uri
+            } catch (e: java.lang.Exception){
+                e.printStackTrace()
+            } finally {
+                stream?.close()
+            }
+        } else{
+            // add support for older android
+            return null
+        }
+        return null
     }
 
     private fun showAlertDialogOnBack() {
