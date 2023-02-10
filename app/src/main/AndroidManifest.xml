@@ -4,11 +4,13 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:allowBackup="true"
+        android:name=".HappyPlaceApp"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="false"
@@ -19,7 +21,7 @@
         android:theme="@style/Theme.HappyPlacesApp"
         tools:targetApi="31">
         <activity
-            android:name=".AddHappyPlaceActivity"
+            android:name=".activities.AddHappyPlaceActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:label="Add Your Happy Place"
@@ -29,7 +31,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

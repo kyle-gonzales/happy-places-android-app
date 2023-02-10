@@ -1,4 +1,4 @@
-package com.example.happyplacesapp
+package com.example.happyplacesapp.activities
 
 import android.app.DatePickerDialog
 import android.icu.util.Calendar
@@ -9,7 +9,6 @@ import androidx.appcompat.app.AlertDialog
 import com.example.happyplacesapp.databinding.ActivityAddHappyPlaceBinding
 import com.karumi.dexter.Dexter
 import android.Manifest
-import android.app.Activity
 import android.content.*
 import android.graphics.Bitmap
 import android.net.Uri
@@ -18,10 +17,12 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
+import androidx.lifecycle.lifecycleScope
+import com.example.happyplacesapp.HappyPlaceApp
+import com.example.happyplacesapp.HappyPlaceDAO
+import com.example.happyplacesapp.HappyPlaceEntity
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -29,22 +30,25 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOError
 import java.io.IOException
 import java.io.OutputStream
 
 class AddHappyPlaceActivity : AppCompatActivity() {
     private var binding : ActivityAddHappyPlaceBinding? = null
+    private var thumbnailUri : Uri? = null
+    private var longitude : Double = 0.0
+    private var latitude : Double = 0.1
 
     private var cameraLauncher : ActivityResultLauncher<Intent> = registerForActivityResult( //replaces startActivityForResult()
         ActivityResultContracts.StartActivityForResult())
     { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
             val thumbnail : Bitmap = result.data?.extras!!.get("data") as Bitmap
-            val uri = saveImage(thumbnail)
-            Log.e("saved file", uri.toString())
+            thumbnailUri = saveImage(thumbnail)
+            Log.e("saved file", thumbnailUri.toString())
             binding?.ivLocation?.setImageBitmap(thumbnail)
         }
     }
@@ -56,13 +60,15 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             val uri = result.data?.data
             try{
                 val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+                thumbnailUri = saveImage(bitmap)
                 binding?.ivLocation?.setImageBitmap(bitmap)
+                Log.e("saved file", thumbnailUri.toString())
+
             } catch (e: Exception) {
                 Toast.makeText(this@AddHappyPlaceActivity, "Image Size Too Large", Toast.LENGTH_SHORT).show()
                 e.printStackTrace()
             }
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +81,9 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         if (supportActionBar != null) {
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
+
+        val happyPlaceDao = (application as HappyPlaceApp).db.getHappyPlaceDao()
+
         binding?.toolbar?.setNavigationOnClickListener {
             onBackPressed()
         }
@@ -84,10 +93,52 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         binding?.tvAddImage?.setOnClickListener {
             showAlertDialogOnImageSelect()
         }
+
+        binding?.btnSave?.setOnClickListener {
+            addHappyPlace(happyPlaceDao)
+        }
     }
 
     override fun onBackPressed() {
         showAlertDialogOnBack()
+    }
+
+    private fun addHappyPlace(happyPlaceDao: HappyPlaceDAO) {
+
+        if (!isValidHappyPlace(binding?.etTitle?.text.toString(), binding?.etDescription?.text.toString(), thumbnailUri.toString(), binding?.etDate?.text.toString(), binding?.etLocation?.text.toString())) {
+
+            Toast.makeText(applicationContext, "Invalid input. Make sure to fill all fields", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val name = binding?.etTitle?.text.toString()
+        val description = binding?.etDescription?.text.toString()
+        val date = binding?.etDate?.text.toString()
+        val location = binding?.etLocation?.text.toString()
+
+        lifecycleScope.launch {
+            happyPlaceDao.addHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailUri.toString(), date = date, location = location, latitude = latitude, longitude = longitude))
+
+            binding?.etTitle?.text?.clear()
+            binding?.etDate?.text?.clear()
+            binding?.etDescription?.text?.clear()
+            binding?.etLocation?.text?.clear()
+            thumbnailUri = null
+            longitude = 0.0
+            latitude = 0.0
+        }
+        Toast.makeText(applicationContext, "happy place saved", Toast.LENGTH_SHORT).show()
+
+//        finish()
+    }
+
+    private fun isValidHappyPlace(name : String, description: String, image : String, date : String, location : String, latitude : Double = 0.0, longitude : Double = 0.0): Boolean {
+        return (name.isNotEmpty() &&
+                description.isNotEmpty() &&
+                image.isNotEmpty() &&
+                date.isNotEmpty() &&
+                location.isNotEmpty() &&
+                ! latitude.isNaN() &&
+                ! longitude.isNaN())
     }
 
     private fun showAlertDialogOnImageSelect() {
@@ -136,7 +187,6 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             binding?.ivLocation?.setImageBitmap(thumbnail)
         }
     }
-
 
     private fun pickPhotoFromGallery() {
         Dexter.withContext(this).withPermissions(
