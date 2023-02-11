@@ -11,14 +11,18 @@ import com.karumi.dexter.Dexter
 import android.Manifest
 import android.content.*
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.get
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import com.example.happyplacesapp.*
 import com.karumi.dexter.MultiplePermissionsReport
@@ -32,11 +36,13 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.io.OutputStream
 
 class AddHappyPlaceActivity : AppCompatActivity() {
     private var binding : ActivityAddHappyPlaceBinding? = null
     private var thumbnailUri : Uri? = null
+    private var thumbnailPath : String? = null
     private var longitude : Double = 0.0
     private var latitude : Double = 0.1
 
@@ -46,7 +52,8 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK && result.data != null) {
             val thumbnail : Bitmap = result.data?.extras!!.get("data") as Bitmap
             thumbnailUri = saveImage(thumbnail)
-            Log.e("saved file", thumbnailUri.toString())
+            thumbnailPath = getFilePath(thumbnailUri!!)
+            Log.e("saved file", thumbnailPath!!)
             binding?.ivLocation?.setImageBitmap(thumbnail)
         }
     }
@@ -59,8 +66,9 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             try{
                 val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
                 thumbnailUri = saveImage(bitmap)
+                thumbnailPath = getFilePath(thumbnailUri!!)
+                Log.e("saved file", thumbnailPath!!)
                 binding?.ivLocation?.setImageBitmap(bitmap)
-                Log.e("saved file", thumbnailUri.toString())
 
             } catch (e: Exception) {
                 Toast.makeText(this@AddHappyPlaceActivity, "Image Size Too Large", Toast.LENGTH_SHORT).show()
@@ -101,9 +109,24 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         showAlertDialogOnBack()
     }
 
+    private fun getFilePath(uri: Uri) : String? {
+
+        val projection = arrayOf(MediaStore.MediaColumns.DATA)
+        return contentResolver.query(uri, projection, null, null, null)?.use {
+            cursor -> if (!cursor.moveToFirst()) return@use null
+            val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+
+//            val name = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME) // gets the name, not the path
+            cursor.getString(columnIndex)
+        }
+    }
+    private fun getFileName(uri: Uri) : String {
+        val docFile = DocumentFile.fromSingleUri(this, uri)
+        return docFile?.name.toString()
+    }
     private fun addHappyPlace(happyPlaceDao: HappyPlaceDAO) {
 
-        if (!isValidHappyPlace(binding?.etTitle?.text.toString(), binding?.etDescription?.text.toString(), thumbnailUri.toString(), binding?.etDate?.text.toString(), binding?.etLocation?.text.toString())) {
+        if (!isValidHappyPlace(binding?.etTitle?.text.toString(), binding?.etDescription?.text.toString(), thumbnailPath!!, binding?.etDate?.text.toString(), binding?.etLocation?.text.toString())) {
 
             Toast.makeText(this, "Invalid input. Make sure to fill all fields", Toast.LENGTH_SHORT).show()
             return
@@ -114,13 +137,14 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         val location = binding?.etLocation?.text.toString()
 
         lifecycleScope.launch {
-            happyPlaceDao.addHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailUri.toString(), date = date, location = location, latitude = latitude, longitude = longitude))
+            happyPlaceDao.addHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
 
             binding?.etTitle?.text?.clear()
             binding?.etDate?.text?.clear()
             binding?.etDescription?.text?.clear()
             binding?.etLocation?.text?.clear()
             thumbnailUri = null
+            thumbnailPath = null
             longitude = 0.0
             latitude = 0.0
         }
@@ -277,6 +301,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             } catch (e: java.lang.Exception){
                 e.printStackTrace()
             } finally {
+                stream?.flush()
                 stream?.close()
             }
         } else{
