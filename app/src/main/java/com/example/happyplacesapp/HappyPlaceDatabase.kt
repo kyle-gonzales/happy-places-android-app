@@ -8,7 +8,7 @@ import androidx.room.RoomSQLiteQuery
 
 
 @Database(entities = [HappyPlaceEntity::class], version = 1)
-abstract class HappyPlaceDatabase : RoomDatabase() {
+abstract class  HappyPlaceDatabase : RoomDatabase() {
 
     abstract fun getHappyPlaceDao() : HappyPlaceDAO
 
@@ -29,7 +29,7 @@ abstract class HappyPlaceDatabase : RoomDatabase() {
 
                     INSTANCE = instance
                 }
-                return instance
+            return instance
             }
         }
     }

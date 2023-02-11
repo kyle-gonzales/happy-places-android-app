@@ -25,7 +25,8 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:label="Add Your Happy Place"
-            android:theme="@style/Theme_NoBar">
+            android:theme="@style/Theme_NoBar"
+            tools:ignore="LockedOrientationActivity">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

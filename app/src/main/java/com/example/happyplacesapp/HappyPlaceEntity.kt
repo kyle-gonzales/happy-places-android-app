@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
 data class HappyPlaceEntity(
 
     @PrimaryKey(autoGenerate =  true)
-    val id : Int = 100,
+    val id : Int = 0,
 
     val name : String,
     val description : String,

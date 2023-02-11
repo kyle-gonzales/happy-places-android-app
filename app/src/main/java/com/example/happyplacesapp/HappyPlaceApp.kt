@@ -7,4 +7,5 @@ class HappyPlaceApp : Application() {
     val db by lazy {
         HappyPlaceDatabase.getInstance(this)
     }
+
 }

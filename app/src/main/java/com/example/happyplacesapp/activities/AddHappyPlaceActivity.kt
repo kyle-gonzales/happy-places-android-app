@@ -20,9 +20,7 @@ import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
-import com.example.happyplacesapp.HappyPlaceApp
-import com.example.happyplacesapp.HappyPlaceDAO
-import com.example.happyplacesapp.HappyPlaceEntity
+import com.example.happyplacesapp.*
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -107,7 +105,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
 
         if (!isValidHappyPlace(binding?.etTitle?.text.toString(), binding?.etDescription?.text.toString(), thumbnailUri.toString(), binding?.etDate?.text.toString(), binding?.etLocation?.text.toString())) {
 
-            Toast.makeText(applicationContext, "Invalid input. Make sure to fill all fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Invalid input. Make sure to fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
         val name = binding?.etTitle?.text.toString()
@@ -126,8 +124,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             longitude = 0.0
             latitude = 0.0
         }
-        Toast.makeText(applicationContext, "happy place saved", Toast.LENGTH_SHORT).show()
-
+        Toast.makeText(this, "happy place saved", Toast.LENGTH_SHORT).show()
 //        finish()
     }
 
@@ -326,5 +323,10 @@ class AddHappyPlaceActivity : AppCompatActivity() {
 
         dpd.datePicker.maxDate = System.currentTimeMillis() - 86400000
         dpd.show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding = null
     }
 }
