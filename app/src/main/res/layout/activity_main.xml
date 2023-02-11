@@ -4,7 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainActivity">
+    tools:context=".activities.MainActivity"
+    >
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvHappyPlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        tools:listitem="@layout/happy_place_recycler_view_item"
+        />
+
+    <TextView
+        android:id="@+id/tvEmptyList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAlignment="center"
+
+        android:text="@string/no_happy_places_text"
+        android:textColor="@color/border_grey"
+        android:textSize="@dimen/btn_text_size"
+
+        tools:visibility="gone"
+        />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"

@@ -9,4 +9,15 @@
     <dimen name="border_box_padding">2dp</dimen>
     <dimen name="border_box_radius">3dp</dimen>
 
+    <dimen name="rv_civ_size">70dp</dimen>
+    <dimen name="rv_civ_border_width">2dp</dimen>
+    <dimen name="rv_civ_vertical_margin">4dp</dimen>
+    <dimen name="rv_civ_horizontal_margin">4dp</dimen>
+    <dimen name="rv_card_vertical_margin">6dp</dimen>
+    <dimen name="rv_card_horizontal_margin">12dp</dimen>
+    <dimen name="rv_title_text_size">16sp</dimen>
+    <dimen name="rv_description_text_size">12sp</dimen>
+    <dimen name="rv_card_corner_radius">4dp</dimen>
+    <dimen name="rv_ll_margin_left">8dp</dimen>
+
 </resources>

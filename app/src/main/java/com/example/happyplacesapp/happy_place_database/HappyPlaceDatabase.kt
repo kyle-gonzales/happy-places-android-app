@@ -1,10 +1,9 @@
-package com.example.happyplacesapp
+package com.example.happyplacesapp.happy_place_database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.RoomSQLiteQuery
 
 
 @Database(entities = [HappyPlaceEntity::class], version = 1)

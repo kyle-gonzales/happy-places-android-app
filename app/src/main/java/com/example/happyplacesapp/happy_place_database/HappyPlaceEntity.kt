@@ -1,4 +1,4 @@
-package com.example.happyplacesapp
+package com.example.happyplacesapp.happy_place_database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

@@ -6,4 +6,5 @@
     <string name="et_hint_location">Location</string>
     <string name="btn_save">SAVE</string>
     <string name="tv_add_image">ADD IMAGE</string>
+    <string name="no_happy_places_text">No happy places found</string>
 </resources>

@@ -11,20 +11,19 @@ import com.karumi.dexter.Dexter
 import android.Manifest
 import android.content.*
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.graphics.get
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import com.example.happyplacesapp.*
+import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
+import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -36,7 +35,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.io.OutputStream
 
 class AddHappyPlaceActivity : AppCompatActivity() {
@@ -149,7 +147,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             latitude = 0.0
         }
         Toast.makeText(this, "happy place saved", Toast.LENGTH_SHORT).show()
-//        finish()
+        finish()
     }
 
     private fun isValidHappyPlace(name : String, description: String, image : String, date : String, location : String, latitude : Double = 0.0, longitude : Double = 0.0): Boolean {

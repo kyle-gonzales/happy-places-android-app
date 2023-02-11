@@ -6,7 +6,9 @@
     <color name="blue_grey">#e7eff6</color>
     <color name="sky_blue">#63cbe3</color>
 
-    <color name="black">#FF000000</color>
+    <color name="black">#121212</color>
     <color name="white">#FFFFFFFF</color>
     <color name="border_grey">#b3b3b3</color>
+
+    <color name="grey_text">#808080</color>
 </resources>

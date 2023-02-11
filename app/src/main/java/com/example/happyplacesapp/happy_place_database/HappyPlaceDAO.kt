@@ -1,4 +1,4 @@
-package com.example.happyplacesapp
+package com.example.happyplacesapp.happy_place_database
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
