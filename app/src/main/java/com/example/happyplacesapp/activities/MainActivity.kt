@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.happyplacesapp.Constants
 import com.example.happyplacesapp.HappyPlaceApp
 import com.example.happyplacesapp.adapters.HappyPlaceAdapter
 import com.example.happyplacesapp.databinding.ActivityMainBinding
@@ -36,12 +37,12 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             happyPlaceDAO.getAllHappyPlaces().collect { happyPlacesList ->
-                setUpRv(ArrayList(happyPlacesList))
+                setHappyPlacesRecyclerView(ArrayList(happyPlacesList))
             }
         }
     }
 
-    private fun setUpRv(happyPlaces: ArrayList<HappyPlaceEntity>) {
+    private fun setHappyPlacesRecyclerView(happyPlaces: ArrayList<HappyPlaceEntity>) {
         if (happyPlaces.isEmpty()) {
             binding?.tvEmptyList?.visibility = View.VISIBLE
             binding?.rvHappyPlace?.visibility = View.GONE
@@ -52,6 +53,14 @@ class MainActivity : AppCompatActivity() {
 
         binding?.tvEmptyList?.visibility = View.GONE
         binding?.rvHappyPlace?.visibility = View.VISIBLE
+
+        happyPlaceAdapter!!.setOnClickListener(object : HappyPlaceAdapter.OnClickListener {
+            override fun onClick(position: Int, entity: HappyPlaceEntity) {
+                val detailsIntent = Intent(this@MainActivity, HappyPlaceDetailActivity::class.java)
+                detailsIntent.putExtra(Constants.RV_HAPPY_PLACE_ITEM, entity)
+                startActivity(detailsIntent)
+            }
+        })
     }
 
     override fun onDestroy() {
