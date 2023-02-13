@@ -11,4 +11,5 @@
     <color name="border_grey">#b3b3b3</color>
 
     <color name="grey_text">#808080</color>
+    <color name="edit_orange">#ffa500</color>
 </resources>

@@ -1,15 +1,21 @@
 package com.example.happyplacesapp.adapters
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.happyplacesapp.utils.Constants
+import com.example.happyplacesapp.activities.AddHappyPlaceActivity
 import com.example.happyplacesapp.databinding.HappyPlaceRecyclerViewItemBinding
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 
-class HappyPlaceAdapter(private val items: ArrayList<HappyPlaceEntity>) : RecyclerView.Adapter<HappyPlaceAdapter.HappyPlaceViewHolder>() {
+class HappyPlaceAdapter(private val context: Context, private val items: ArrayList<HappyPlaceEntity>) : RecyclerView.Adapter<HappyPlaceAdapter.HappyPlaceViewHolder>() {
 
     private var onClickListener : OnClickListener? = null
+
 
     fun setOnClickListener( onClickListener: OnClickListener) {
         this.onClickListener = onClickListener
@@ -38,6 +44,13 @@ class HappyPlaceAdapter(private val items: ArrayList<HappyPlaceEntity>) : Recycl
                onClickListener!!.onClick(position, item)
             }
         }
+    }
+
+    fun notifyEditItem (activity: Activity, position: Int, requestCode : Int) {
+        val intent = Intent(context, AddHappyPlaceActivity::class.java)
+        intent.putExtra(Constants.RV_HAPPY_PLACE_ITEM, items[position])
+        activity.startActivityForResult(intent, requestCode)
+        notifyItemChanged(position)
     }
 
     interface OnClickListener {

@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.happyplacesapp.*
 import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
+import com.example.happyplacesapp.utils.Constants
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -43,6 +44,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
     private var thumbnailPath : String? = null
     private var longitude : Double = 0.0
     private var latitude : Double = 0.1
+
 
     private var cameraLauncher : ActivityResultLauncher<Intent> = registerForActivityResult( //replaces startActivityForResult()
         ActivityResultContracts.StartActivityForResult())
@@ -75,6 +77,10 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }
     }
 
+    //updating an existing happy place
+
+    private var happyPlace : HappyPlaceEntity? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddHappyPlaceBinding.inflate(layoutInflater)
@@ -87,6 +93,24 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }
 
         val happyPlaceDao = (application as HappyPlaceApp).db.getHappyPlaceDao()
+
+        if (intent.hasExtra(Constants.RV_HAPPY_PLACE_ITEM)) {
+            happyPlace = intent.getSerializableExtra(Constants.RV_HAPPY_PLACE_ITEM) as HappyPlaceEntity
+        }
+
+        if (happyPlace != null) {
+            supportActionBar?.title = "Edit Happy Place"
+
+            binding?.btnSave?.text = "Update"
+
+            binding?.etTitle?.setText(happyPlace?.name)
+            binding?.etDescription?.setText(happyPlace?.description)
+            binding?.etDate?.setText(happyPlace?.date)
+            binding?.etLocation?.setText(happyPlace?.location)
+            binding?.ivLocation?.setImageURI(Uri.parse(happyPlace?.image))
+
+            thumbnailPath = getFilePath(Uri.parse(happyPlace?.image))
+        }
 
         binding?.toolbar?.setNavigationOnClickListener {
             onBackPressed()
@@ -102,6 +126,8 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             addHappyPlace(happyPlaceDao)
         }
     }
+
+
 
     override fun onBackPressed() {
         showAlertDialogOnBack()
@@ -133,9 +159,18 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         val description = binding?.etDescription?.text.toString()
         val date = binding?.etDate?.text.toString()
         val location = binding?.etLocation?.text.toString()
-
         lifecycleScope.launch {
-            happyPlaceDao.addHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
+
+            if (happyPlace != null) { // does not update
+                happyPlaceDao.updateHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
+                Toast.makeText(this@AddHappyPlaceActivity, "happy place updated", Toast.LENGTH_SHORT).show()
+                finish()
+
+            } else {
+                happyPlaceDao.addHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
+                Toast.makeText(this@AddHappyPlaceActivity, "happy place saved", Toast.LENGTH_SHORT).show()
+                finish()
+            }
 
             binding?.etTitle?.text?.clear()
             binding?.etDate?.text?.clear()
@@ -146,9 +181,10 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             longitude = 0.0
             latitude = 0.0
         }
-        Toast.makeText(this, "happy place saved", Toast.LENGTH_SHORT).show()
-        finish()
+
     }
+
+
 
     private fun isValidHappyPlace(name : String, description: String, image : String, date : String, location : String, latitude : Double = 0.0, longitude : Double = 0.0): Boolean {
         return (name.isNotEmpty() &&
@@ -198,14 +234,14 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }).onSameThread().check()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == 1) {
-            val thumbnail : Bitmap = data!!.extras!!.get("data") as Bitmap
-            binding?.ivLocation?.setImageBitmap(thumbnail)
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//
+//        if (resultCode == 1) {
+//            val thumbnail : Bitmap = data!!.extras!!.get("data") as Bitmap
+//            binding?.ivLocation?.setImageBitmap(thumbnail)
+//        }
+//    }
 
     private fun pickPhotoFromGallery() {
         Dexter.withContext(this).withPermissions(

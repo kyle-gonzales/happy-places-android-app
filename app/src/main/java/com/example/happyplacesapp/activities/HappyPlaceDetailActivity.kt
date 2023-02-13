@@ -3,7 +3,7 @@ package com.example.happyplacesapp.activities
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.happyplacesapp.Constants
+import com.example.happyplacesapp.utils.Constants
 import com.example.happyplacesapp.databinding.ActivityHappyPlaceDetailBinding
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 
