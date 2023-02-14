@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private var binding : ActivityMainBinding? = null
     private var happyPlaceAdapter : HappyPlaceAdapter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate (savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding?.root)
@@ -47,8 +48,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setHappyPlacesRecyclerView(happyPlaces: ArrayList<HappyPlaceEntity>) {
         if (happyPlaces.isEmpty()) {
+            Toast.makeText(this, "empty list", Toast.LENGTH_SHORT).show()
             binding?.tvEmptyList?.visibility = View.VISIBLE
             binding?.rvHappyPlace?.visibility = View.GONE
+            return
         }
         happyPlaceAdapter = HappyPlaceAdapter(this@MainActivity, happyPlaces)
         binding?.rvHappyPlace?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)

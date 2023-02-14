@@ -21,7 +21,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.example.happyplacesapp.*
+import com.example.happyplacesapp.adapters.HappyPlaceAdapter
 import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 import com.example.happyplacesapp.utils.Constants
@@ -78,7 +80,6 @@ class AddHappyPlaceActivity : AppCompatActivity() {
     }
 
     //updating an existing happy place
-
     private var happyPlace : HappyPlaceEntity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,7 +110,13 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             binding?.etLocation?.setText(happyPlace?.location)
             binding?.ivLocation?.setImageURI(Uri.parse(happyPlace?.image))
 
-            thumbnailPath = getFilePath(Uri.parse(happyPlace?.image))
+            try{
+                thumbnailPath = Uri.parse(happyPlace?.image).toString()
+//                Toast.makeText(this, thumbnailPath, Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this, "thumbnail error", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
+            }
         }
 
         binding?.toolbar?.setNavigationOnClickListener {
@@ -126,8 +133,6 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             addHappyPlace(happyPlaceDao)
         }
     }
-
-
 
     override fun onBackPressed() {
         showAlertDialogOnBack()
@@ -159,11 +164,19 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         val description = binding?.etDescription?.text.toString()
         val date = binding?.etDate?.text.toString()
         val location = binding?.etLocation?.text.toString()
+
+        Toast.makeText(this, arrayListOf(name, description, date, location).toString(), Toast.LENGTH_LONG).show()
+
         lifecycleScope.launch {
 
             if (happyPlace != null) { // does not update
-                happyPlaceDao.updateHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
+//                val rv = findViewById<RecyclerView>(R.id.rvHappyPlace)
+//                val adapter = (rv.adapter) as HappyPlaceAdapter
+                happyPlaceDao.updateHappyPlace(HappyPlaceEntity(id = happyPlace!!.id, name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
                 Toast.makeText(this@AddHappyPlaceActivity, "happy place updated", Toast.LENGTH_SHORT).show()
+
+
+
                 finish()
 
             } else {
