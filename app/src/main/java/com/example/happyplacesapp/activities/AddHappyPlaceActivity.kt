@@ -21,12 +21,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
-import com.example.happyplacesapp.*
-import com.example.happyplacesapp.adapters.HappyPlaceAdapter
 import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 import com.example.happyplacesapp.utils.Constants
+import com.example.happyplacesapp.utils.HappyPlaceApp
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -165,18 +163,11 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         val date = binding?.etDate?.text.toString()
         val location = binding?.etLocation?.text.toString()
 
-        Toast.makeText(this, arrayListOf(name, description, date, location).toString(), Toast.LENGTH_LONG).show()
-
         lifecycleScope.launch {
 
             if (happyPlace != null) { // does not update
-//                val rv = findViewById<RecyclerView>(R.id.rvHappyPlace)
-//                val adapter = (rv.adapter) as HappyPlaceAdapter
                 happyPlaceDao.updateHappyPlace(HappyPlaceEntity(id = happyPlace!!.id, name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
                 Toast.makeText(this@AddHappyPlaceActivity, "happy place updated", Toast.LENGTH_SHORT).show()
-
-
-
                 finish()
 
             } else {
@@ -194,7 +185,6 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             longitude = 0.0
             latitude = 0.0
         }
-
     }
 
 
