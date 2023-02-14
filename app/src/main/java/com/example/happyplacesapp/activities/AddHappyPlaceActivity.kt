@@ -21,10 +21,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
+import com.example.happyplacesapp.R
 import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 import com.example.happyplacesapp.utils.Constants
 import com.example.happyplacesapp.utils.HappyPlaceApp
+import com.google.android.libraries.places.api.Places
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -96,7 +98,6 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         if (intent.hasExtra(Constants.RV_HAPPY_PLACE_ITEM)) {
             happyPlace = intent.getSerializableExtra(Constants.RV_HAPPY_PLACE_ITEM) as HappyPlaceEntity
         }
-
         if (happyPlace != null) {
             supportActionBar?.title = "Edit Happy Place"
 
@@ -115,6 +116,10 @@ class AddHappyPlaceActivity : AppCompatActivity() {
                 Toast.makeText(this, "thumbnail error", Toast.LENGTH_SHORT).show()
                 e.printStackTrace()
             }
+        }
+
+        if (!Places.isInitialized()) {
+            Places.initialize(this@AddHappyPlaceActivity, resources.getString(R.string.google_maps_api_key))
         }
 
         binding?.toolbar?.setNavigationOnClickListener {
