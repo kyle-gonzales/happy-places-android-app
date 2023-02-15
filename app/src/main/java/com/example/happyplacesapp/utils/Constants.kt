@@ -7,4 +7,7 @@ object Constants {
 
     const val RV_ADD_PLACE_ACTIVITY_REQUEST_CODE : Int = 1
 
+    const val LOCATION_NAME : String = "location_name"
+
+
 }
