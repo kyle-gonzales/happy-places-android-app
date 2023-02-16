@@ -1,5 +1,6 @@
 package com.example.happyplacesapp.activities
 
+import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -35,5 +36,17 @@ class HappyPlaceDetailActivity : AppCompatActivity() {
             binding?.tvDescription?.text = happyPlaceItem?.description
             binding?.tvLocation?.text = happyPlaceItem?.location
         }
+
+        binding?.btnViewMap?.setOnClickListener {
+            val mapIntent = Intent(this, MapActivity::class.java)
+            mapIntent.putExtra(Constants.RV_HAPPY_PLACE_ITEM, happyPlaceItem)
+            startActivity(mapIntent)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        binding = null
     }
 }

@@ -10,15 +10,16 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.happyplacesapp.utils.Constants
+import com.example.happyplacesapp.utils.HappyPlaceApp
 import com.example.happyplacesapp.utils.SwipeToEditCallback
 import com.example.happyplacesapp.adapters.HappyPlaceAdapter
 import com.example.happyplacesapp.databinding.ActivityMainBinding
 import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 import com.karumi.dexter.Dexter
+import com.example.happyplacesapp.utils.SwipeToDeleteCallback
 import kotlinx.coroutines.launch
 import android.Manifest
-import com.example.happyplacesapp.utils.HappyPlaceApp
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
@@ -80,7 +81,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setHappyPlacesRecyclerView(happyPlaces: ArrayList<HappyPlaceEntity>) {
         if (happyPlaces.isEmpty()) {
-            Toast.makeText(this, "empty list", Toast.LENGTH_SHORT).show()
             binding?.tvEmptyList?.visibility = View.VISIBLE
             binding?.rvHappyPlace?.visibility = View.GONE
             return
@@ -108,6 +108,25 @@ class MainActivity : AppCompatActivity() {
         }
         val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
         editItemTouchHelper.attachToRecyclerView(binding?.rvHappyPlace)
+
+        val deleteSwipeHandler = object : SwipeToDeleteCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+                val adapter = binding?.rvHappyPlace?.adapter as HappyPlaceAdapter
+                val happyPlaceToDelete = adapter.notifyDeleteItem(viewHolder.adapterPosition)
+                deleteHappyPlace(happyPlaceToDelete)
+            }
+        }
+        val deleteItemTouchHelper = ItemTouchHelper(deleteSwipeHandler)
+        deleteItemTouchHelper.attachToRecyclerView(binding?.rvHappyPlace)
+    }
+    fun deleteHappyPlace(happyPlace: HappyPlaceEntity) {
+        val happyPlaceDao = (application as HappyPlaceApp).db.getHappyPlaceDao()
+
+        lifecycleScope.launch {
+            happyPlaceDao.deleteHappyPlace(happyPlace)
+            Toast.makeText(applicationContext, "happy place deleted", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroy() {

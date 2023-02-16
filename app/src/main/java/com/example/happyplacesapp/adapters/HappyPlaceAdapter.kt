@@ -6,11 +6,15 @@ import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.happyplacesapp.utils.Constants
 import com.example.happyplacesapp.activities.AddHappyPlaceActivity
+import com.example.happyplacesapp.activities.MainActivity
 import com.example.happyplacesapp.databinding.HappyPlaceRecyclerViewItemBinding
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
+import kotlinx.coroutines.launch
 
 class HappyPlaceAdapter(private val context: Context, private val items: ArrayList<HappyPlaceEntity>) : RecyclerView.Adapter<HappyPlaceAdapter.HappyPlaceViewHolder>() {
 
@@ -51,6 +55,10 @@ class HappyPlaceAdapter(private val context: Context, private val items: ArrayLi
         intent.putExtra(Constants.RV_HAPPY_PLACE_ITEM, items[position])
         activity.startActivityForResult(intent, requestCode)
         notifyItemChanged(position)
+    }
+    fun notifyDeleteItem (position : Int) : HappyPlaceEntity {
+        notifyItemRemoved(position)
+        return items[position]
     }
 
     interface OnClickListener {

@@ -101,6 +101,8 @@
                     android:layout_height="wrap_content"
                     android:inputType="textCapWords"
                     android:hint="@string/et_hint_location"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     />
             </com.google.android.material.textfield.TextInputLayout>
 
