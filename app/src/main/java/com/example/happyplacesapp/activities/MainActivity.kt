@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.happyplacesapp.utils.Constants
-import com.example.happyplacesapp.HappyPlaceApp
 import com.example.happyplacesapp.utils.SwipeToEditCallback
 import com.example.happyplacesapp.adapters.HappyPlaceAdapter
 import com.example.happyplacesapp.databinding.ActivityMainBinding
@@ -19,6 +18,7 @@ import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 import com.karumi.dexter.Dexter
 import kotlinx.coroutines.launch
 import android.Manifest
+import com.example.happyplacesapp.utils.HappyPlaceApp
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
