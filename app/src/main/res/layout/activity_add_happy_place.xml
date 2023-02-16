@@ -106,6 +106,18 @@
                     />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <Button
+                android:id="@+id/btnCurrentLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:text="@string/use_current_location"
+                android:backgroundTint="?attr/colorPrimaryVariant"
+
+                app:layout_constraintTop_toBottomOf="@id/tilLocation"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/ivLocation"
                 android:layout_width="@dimen/iv_location_size"
@@ -113,7 +125,7 @@
                 android:padding="@dimen/border_box_padding"
                 android:layout_marginVertical="@dimen/cl_padding"
 
-                app:layout_constraintTop_toBottomOf="@id/tilLocation"
+                app:layout_constraintTop_toBottomOf="@id/btnCurrentLocation"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/btnSave"
                 android:background="@drawable/rectangle_grey_border"

@@ -10,6 +10,7 @@ import com.example.happyplacesapp.databinding.ActivityAddHappyPlaceBinding
 import com.karumi.dexter.Dexter
 import android.Manifest
 import android.content.*
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -19,15 +20,24 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.FragmentFactory
 import androidx.lifecycle.lifecycleScope
 import com.example.happyplacesapp.R
 import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
 import com.example.happyplacesapp.utils.Constants
 import com.example.happyplacesapp.utils.HappyPlaceApp
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.tasks.CancellationToken
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.PlaceLikelihood
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
@@ -44,12 +54,13 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 
-class AddHappyPlaceActivity : AppCompatActivity() {
+class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
     private var binding : ActivityAddHappyPlaceBinding? = null
     private var thumbnailUri : Uri? = null
     private var thumbnailPath : String? = null
     private var longitude : Double = 0.0
     private var latitude : Double = 0.0
+    private var placesClient : PlacesClient? = null
 
     private var locationLauncher : ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -137,6 +148,11 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             Places.initialize(this@AddHappyPlaceActivity, resources.getString(R.string.google_maps_api_key  ))
         }
 
+        placesClient = Places.createClient(this)
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
+
         binding?.toolbar?.setNavigationOnClickListener {
             onBackPressed()
         }
@@ -151,6 +167,46 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }
         binding?.etLocation?.setOnClickListener {
             getLocation()
+        }
+        binding?.btnCurrentLocation?.setOnClickListener {
+            getCurrentLocation()
+            Toast.makeText(this, "getting current location...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getCurrentLocation() {
+        if (!(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)){
+            showRationalDialogForPermissions()
+            return
+        }
+
+        val placeFields = listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG)
+        val request = FindCurrentPlaceRequest.newInstance(placeFields)
+
+        val placeRequest = placesClient?.findCurrentPlace(request)
+        var results : ArrayList<PlaceLikelihood>? = null
+        placeRequest?.addOnCompleteListener {
+            task ->
+            if (task.isSuccessful) {
+                results = ArrayList(task.result!!.placeLikelihoods)
+                Toast.makeText(this, "likely places obtained", Toast.LENGTH_SHORT).show()
+            }
+//            Log.i("results length", results?.size.toString())
+
+            var highestLikelihood : Double = 0.0
+            var place : Place? = null
+
+            results?.forEach {likelyPlace ->
+                if (likelyPlace.likelihood > highestLikelihood) {
+                    highestLikelihood = likelyPlace.likelihood
+                    place = likelyPlace.place
+                }
+                //Log.i("LikelyPlace", "${likelyPlace.place} : ${likelyPlace.likelihood}\n")
+
+            }
+            binding?.etLocation?.setText(place?.address)
+            latitude = place?.latLng!!.latitude
+            longitude = place?.latLng!!.longitude
         }
     }
 
@@ -421,5 +477,9 @@ class AddHappyPlaceActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         binding = null
+    }
+
+    override fun onMapReady(googleMap: GoogleMap?) {
+
     }
 }
