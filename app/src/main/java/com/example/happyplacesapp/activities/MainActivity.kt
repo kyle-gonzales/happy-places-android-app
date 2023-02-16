@@ -16,7 +16,13 @@ import com.example.happyplacesapp.adapters.HappyPlaceAdapter
 import com.example.happyplacesapp.databinding.ActivityMainBinding
 import com.example.happyplacesapp.happy_place_database.HappyPlaceDAO
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
+import com.karumi.dexter.Dexter
 import kotlinx.coroutines.launch
+import android.Manifest
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 
 class MainActivity : AppCompatActivity() {
     private var binding : ActivityMainBinding? = null
@@ -35,6 +41,32 @@ class MainActivity : AppCompatActivity() {
         }
 
         displayAllHappyPlaces(happyPlaceDao)
+        getLocationPermission()
+    }
+
+    private fun getLocationPermission() {
+        Dexter.withContext(this@MainActivity).withPermissions(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION).withListener(object : MultiplePermissionsListener {
+            override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                if (report!!.areAllPermissionsGranted()) {
+                    return
+                } else if (report.isAnyPermissionPermanentlyDenied) {
+                    showRationalDialogOnPermission()
+                } else {
+                    Toast.makeText(this@MainActivity, "we need access to your location to have the best app experience", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onPermissionRationaleShouldBeShown(permissionRequests: MutableList<PermissionRequest>?, token: PermissionToken?) {
+                token?.continuePermissionRequest()
+            }
+
+        })
+    }
+
+    private fun showRationalDialogOnPermission() {
+
     }
 
     private fun displayAllHappyPlaces(happyPlaceDAO: HappyPlaceDAO) {
