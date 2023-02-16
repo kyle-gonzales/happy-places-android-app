@@ -29,6 +29,7 @@ import com.example.happyplacesapp.utils.HappyPlaceApp
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -59,6 +60,8 @@ class AddHappyPlaceActivity : AppCompatActivity() {
             binding?.etLocation?.setText(place.address)
             latitude = place.latLng!!.latitude
             longitude = place.latLng!!.longitude
+        } else if (result.resultCode == AutocompleteActivity.RESULT_ERROR) {
+            Toast.makeText(this, "Error in loading autocomplete", Toast.LENGTH_SHORT).show()
         }
     }
     private var cameraLauncher : ActivityResultLauncher<Intent> = registerForActivityResult( //replaces startActivityForResult()

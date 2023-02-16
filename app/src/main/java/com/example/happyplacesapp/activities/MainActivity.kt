@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         displayAllHappyPlaces(happyPlaceDao)
-        getLocationPermission()
+//        getLocationPermission()
     }
 
     private fun getLocationPermission() {
@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 token?.continuePermissionRequest()
             }
 
-        })
+        }).onSameThread().check()
     }
 
     private fun showRationalDialogOnPermission() {
