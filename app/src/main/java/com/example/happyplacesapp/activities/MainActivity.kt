@@ -20,6 +20,10 @@ import com.karumi.dexter.Dexter
 import com.example.happyplacesapp.utils.SwipeToDeleteCallback
 import kotlinx.coroutines.launch
 import android.Manifest
+import android.content.ActivityNotFoundException
+import android.net.Uri
+import android.provider.Settings
+import androidx.appcompat.app.AlertDialog
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
@@ -42,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         displayAllHappyPlaces(happyPlaceDao)
-//        getLocationPermission()
+        getLocationPermission()
     }
 
     private fun getLocationPermission() {
@@ -67,7 +71,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showRationalDialogOnPermission() {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage("We need to access this feature in order to get the best experience using this App. Set Permissions in the settings")
+        builder.setCancelable(false)
 
+        builder.setPositiveButton("Settings") {
+            dialog, _ ->
+            try {
+
+                val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", packageName, null)
+                settingsIntent.data = uri
+                startActivity(settingsIntent)
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(this, "failed to open settings", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
+
+            } catch (e: Exception) {
+                Toast.makeText(this, "error", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
+            }
+        }
+        builder.setNegativeButton("Continue") {
+            dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.create().show()
     }
 
     private fun displayAllHappyPlaces(happyPlaceDAO: HappyPlaceDAO) {

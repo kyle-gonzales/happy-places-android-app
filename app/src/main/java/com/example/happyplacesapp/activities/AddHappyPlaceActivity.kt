@@ -134,7 +134,7 @@ class AddHappyPlaceActivity : AppCompatActivity() {
         }
 
         if (!Places.isInitialized()) {
-            Places.initialize(this@AddHappyPlaceActivity, resources.getString(R.string.google_maps_api_key))
+            Places.initialize(this@AddHappyPlaceActivity, resources.getString(R.string.google_maps_api_key  ))
         }
 
         binding?.toolbar?.setNavigationOnClickListener {
