@@ -57,7 +57,7 @@ import java.io.OutputStream
 class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
     private var binding : ActivityAddHappyPlaceBinding? = null
     private var thumbnailUri : Uri? = null
-    private var thumbnailPath : String? = null
+    private var thumbnailPath : String = ""
     private var longitude : Double = 0.0
     private var latitude : Double = 0.0
     private var placesClient : PlacesClient? = null
@@ -81,8 +81,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
         if (result.resultCode == RESULT_OK && result.data != null) {
             val thumbnail : Bitmap = result.data?.extras!!.get("data") as Bitmap
             thumbnailUri = saveImage(thumbnail)
-            thumbnailPath = getFilePath(thumbnailUri!!)
-            Log.e("saved file", thumbnailPath!!)
+            thumbnailPath = getFilePath(thumbnailUri!!)!!
+            Log.e("saved file", thumbnailPath)
             binding?.ivLocation?.setImageBitmap(thumbnail)
         }
     }
@@ -94,8 +94,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
             try{
                 val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
                 thumbnailUri = saveImage(bitmap)
-                thumbnailPath = getFilePath(thumbnailUri!!)
-                Log.e("saved file", thumbnailPath!!)
+                thumbnailPath = getFilePath(thumbnailUri!!)!!
+                Log.e("saved file", thumbnailPath)
                 binding?.ivLocation?.setImageBitmap(bitmap)
 
             } catch (e: Exception) {
@@ -175,6 +175,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun getCurrentLocation() {
+        // check episode 206 and episode 207 for alternative solution https://www.udemy.com/course/android-kotlin-developer
         if (!(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)){
             showRationalDialogForPermissions()
             return
@@ -242,7 +243,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
     }
     private fun addHappyPlace(happyPlaceDao: HappyPlaceDAO) {
 
-        if (!isValidHappyPlace(binding?.etTitle?.text.toString(), binding?.etDescription?.text.toString(), thumbnailPath!!, binding?.etDate?.text.toString(), binding?.etLocation?.text.toString())) {
+        if (!isValidHappyPlace(binding?.etTitle?.text.toString(), binding?.etDescription?.text.toString(), thumbnailPath, binding?.etDate?.text.toString(), binding?.etLocation?.text.toString())) {
 
             Toast.makeText(this, "Invalid input. Make sure to fill all fields", Toast.LENGTH_SHORT).show()
             return
@@ -255,12 +256,12 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
         lifecycleScope.launch {
 
             if (happyPlace != null) { // does not update
-                happyPlaceDao.updateHappyPlace(HappyPlaceEntity(id = happyPlace!!.id, name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
+                happyPlaceDao.updateHappyPlace(HappyPlaceEntity(id = happyPlace!!.id, name = name, description = description, image = thumbnailPath, date = date, location = location, latitude = latitude, longitude = longitude))
                 Toast.makeText(this@AddHappyPlaceActivity, "happy place updated", Toast.LENGTH_SHORT).show()
                 finish()
 
             } else {
-                happyPlaceDao.addHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailPath!!, date = date, location = location, latitude = latitude, longitude = longitude))
+                happyPlaceDao.addHappyPlace(HappyPlaceEntity(name = name, description = description, image = thumbnailPath, date = date, location = location, latitude = latitude, longitude = longitude))
                 Toast.makeText(this@AddHappyPlaceActivity, "happy place saved", Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -270,7 +271,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
             binding?.etDescription?.text?.clear()
             binding?.etLocation?.text?.clear()
             thumbnailUri = null
-            thumbnailPath = null
+            thumbnailPath = ""
             longitude = 0.0
             latitude = 0.0
         }
@@ -334,33 +335,38 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
 //    }
 
     private fun pickPhotoFromGallery() {
-        Dexter.withContext(this).withPermissions(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            .withListener(object: MultiplePermissionsListener{
-                override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-                    if(report!!.areAllPermissionsGranted()){
-//                        Toast.makeText(this@AddHappyPlaceActivity, "Storage READ/WRITE Permissions Granted", Toast.LENGTH_SHORT).show()
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+            Dexter.withContext(this).withPermissions(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(object: MultiplePermissionsListener{
+                    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                        if(report!!.areAllPermissionsGranted()){
+    //                        Toast.makeText(this@AddHappyPlaceActivity, "Storage READ/WRITE Permissions Granted", Toast.LENGTH_SHORT).show()
 
-                        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                        galleryLauncher.launch(galleryIntent)
+                            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                            galleryLauncher.launch(galleryIntent)
+                        }
+                        else if(report.isAnyPermissionPermanentlyDenied){
+                            // after denying permissions twice, the app is permanently denied. That is when you want
+    //                        Toast.makeText(this@AddHappyPlaceActivity, "permanently denied", Toast.LENGTH_SHORT).show()
+                            showRationalDialogForPermissions()
+                        }else{
+                            Toast.makeText(this@AddHappyPlaceActivity, "we need access", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                    else if(report.isAnyPermissionPermanentlyDenied){
-                        // after denying permissions twice, the app is permanently denied. That is when you want
-//                        Toast.makeText(this@AddHappyPlaceActivity, "permanently denied", Toast.LENGTH_SHORT).show()
-                        showRationalDialogForPermissions()
-                    }else{
-                        Toast.makeText(this@AddHappyPlaceActivity, "we need access", Toast.LENGTH_SHORT).show()
+                    override fun onPermissionRationaleShouldBeShown( // asks the user for permissions
+                        permissions: MutableList<PermissionRequest>?,
+                        token: PermissionToken?
+                    ) {
+                        token?.continuePermissionRequest()
                     }
-                }
-                override fun onPermissionRationaleShouldBeShown( // asks the user for permissions
-                    permissions: MutableList<PermissionRequest>?,
-                    token: PermissionToken?
-                ) {
-                    token?.continuePermissionRequest()
-                }
 
-            }).onSameThread().check()
+                }).onSameThread().check()
+        } else {
+            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            galleryLauncher.launch(galleryIntent)
+        }
     }
 
     private fun showRationalDialogForPermissions() {
@@ -479,7 +485,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = null
     }
 
-    override fun onMapReady(googleMap: GoogleMap?) {
-
+    override fun onMapReady(p0: GoogleMap) {
+        TODO("Not yet implemented")
     }
 }

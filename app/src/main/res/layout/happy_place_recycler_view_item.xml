@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
 
         app:cardCornerRadius="@dimen/rv_card_corner_radius"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="?attr/cardBackgroundColor"
         app:cardUseCompatPadding="true"
 
         android:layout_marginHorizontal="@dimen/rv_card_horizontal_margin"
@@ -58,7 +58,6 @@
                     android:layout_height="wrap_content"
 
                     android:textSize="@dimen/rv_title_text_size"
-                    android:textColor="@color/black"
                     android:textStyle="bold"
                     tool:text="Title Name"
                     />
