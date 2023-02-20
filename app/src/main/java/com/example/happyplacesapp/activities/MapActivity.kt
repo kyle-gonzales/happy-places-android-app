@@ -3,6 +3,7 @@ package com.example.happyplacesapp.activities
 import android.graphics.Point
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import com.example.happyplacesapp.R
 import com.example.happyplacesapp.databinding.ActivityMapBinding
 import com.example.happyplacesapp.happy_place_database.HappyPlaceEntity
@@ -36,25 +37,26 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             supportActionBar?.title = "Your Happy Place"
         }
-
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        if (happyPlaceItem != null) {
+            val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+            mapFragment.getMapAsync(this)
+            Toast.makeText(this, "lat: ${happyPlaceItem!!.latitude}\nlang: ${happyPlaceItem!!.longitude} ", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         binding = null
     }
-
-    override fun onMapReady(map: GoogleMap?) {
+    override fun onMapReady(map: GoogleMap) {
         val location = LatLng(happyPlaceItem!!.latitude, happyPlaceItem!!.longitude)
-        map?.addMarker(MarkerOptions().position(location).title(happyPlaceItem!!.name))
+        map.addMarker(MarkerOptions().position(location).title(happyPlaceItem!!.name))
 
         val newLatLngZoom = CameraUpdateFactory.newLatLngZoom(location, 15.0f)
 
 //        map?.moveCamera(CameraUpdateFactory.newLatLng(location))
 //        map?.moveCamera(newLatLngZoom)
 
-        map?.animateCamera(newLatLngZoom)
+        map.animateCamera(newLatLngZoom)
     }
 }

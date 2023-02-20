@@ -54,7 +54,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 
-class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
+class AddHappyPlaceActivity : AppCompatActivity() {
     private var binding : ActivityAddHappyPlaceBinding? = null
     private var thumbnailUri : Uri? = null
     private var thumbnailPath : String = ""
@@ -149,9 +149,6 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         placesClient = Places.createClient(this)
-
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
 
         binding?.toolbar?.setNavigationOnClickListener {
             onBackPressed()
@@ -483,9 +480,5 @@ class AddHappyPlaceActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onDestroy() {
         super.onDestroy()
         binding = null
-    }
-
-    override fun onMapReady(p0: GoogleMap) {
-        TODO("Not yet implemented")
     }
 }
